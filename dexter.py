@@ -17,13 +17,15 @@ class Dexter(cmd.Cmd):
     intro = "Welcome to Dexter!"
     prompt = '(dexter) '
 
-    def do_fetch(self, arg):
-        "Fetch orderbooks for the specific currency pair"
-        print("actually fetch order books...")
-
     def do_issue(self, arg):
-        "Issue a new testnet currency"
-        print("actually issue currency...")
+        """Issue a new testnet currency
+
+Parameters:
+- token (for example, USD)
+- amount (for example, 1000)
+- receiver seed (generate on XRPL TestNet Faucet)"""
+
+        print("Issuing currency")
 
         args = arg.split()
 
@@ -41,10 +43,7 @@ class Dexter(cmd.Cmd):
         signed_account_set = safe_sign_and_autofill_transaction(
             account_set, issuer, client)
 
-        response = send_reliable_submission(signed_account_set, client)
-
-        print("account set response")
-        print(response)
+        send_reliable_submission(signed_account_set, client)
 
         trust_set = TrustSet.from_dict(
             {
@@ -59,10 +58,7 @@ class Dexter(cmd.Cmd):
 
         signed_trust_set = safe_sign_and_autofill_transaction(
             trust_set, receiver, client)
-        response = send_reliable_submission(signed_trust_set, client)
-
-        print("trust set response")
-        print(response)
+        send_reliable_submission(signed_trust_set, client)
 
         usd_amount = IssuedCurrencyAmount(value=amount,
                                           issuer=issuer.classic_address,
@@ -74,20 +70,26 @@ class Dexter(cmd.Cmd):
             payment,
             issuer,
             client)
-        response = send_reliable_submission(signed_payment, client)
+        send_reliable_submission(signed_payment, client)
 
-        print("payment response")
-        print(response)
+        print("Issued " + amount + " " + token + "." + issuer.classic_address)
 
     def do_liquidity(self, arg):
-        "Create orders on DEX"
-        print("actually create orders...")
+        """Create orders on DEX
+
+Parameters:
+- token_with_address, format <token.issuer_address> (for example, USD.r4MHpHsaZnQ9L1F2Qh4YhXD1CaRA7SUz8v)
+- amount (for example, 100)
+- mid price (for example, 0.87)
+- steps (for example, 3)
+- interval - in bps of mid price - for example, 20
+- receiver seed (use the same as in issuance)"""
+
+        print("Creating liquidity on DEX")
+
         args = arg.split()
 
         token, issuer_address = args[0].split(".")
-
-        print(token)
-        print(issuer_address)
 
         token_amount = args[1]
         mid_price = float(args[2])  # Price of one XRP in token units
@@ -104,7 +106,7 @@ class Dexter(cmd.Cmd):
 
         receiver = Wallet(receiver_seed, 0)
 
-        for i in range(1, steps):
+        for i in range(1, steps+1):
             ask_price = mid_price * (1 + (interval * i) / 10000)
             ask_xrp_amount = float(token_amount) / ask_price
 
@@ -121,9 +123,10 @@ class Dexter(cmd.Cmd):
                         receiver,
                         OfferCreateFlag.TF_SELL)
 
+        print("Orders are created")
+
 
 def place_order(amount_to_buy, amount_to_sell, receiver, flags):
-
     if flags is None:
         offer_create = \
             OfferCreate(account=receiver.classic_address,
@@ -140,10 +143,7 @@ def place_order(amount_to_buy, amount_to_sell, receiver, flags):
         offer_create,
         receiver,
         client)
-    response = send_reliable_submission(signed_offer_create, client)
-
-    print("order response")
-    print(response)
+    send_reliable_submission(signed_offer_create, client)
 
 
 if __name__ == '__main__':
