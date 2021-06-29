@@ -33,8 +33,11 @@ Parameters:
         amount = args[1]
         receiver_seed = args[2]
 
-        token_bytes = token.encode("ASCII").hex().upper()
-        token_symbol = '{:<040s}'.format(token_bytes)
+        if len(token) > 3:
+            token_bytes = token.encode("ASCII").hex().upper()
+            token_symbol = '{:<040s}'.format(token_bytes)
+        else:
+            token_symbol = token.upper()
 
         receiver = Wallet(receiver_seed, 0)
         issuer = generate_faucet_wallet(client)
@@ -97,8 +100,11 @@ Parameters:
         interval = float(args[4])
         receiver_seed = args[5]
 
-        token_bytes = token.encode("ASCII").hex().upper()
-        token_symbol = '{:<040s}'.format(token_bytes)
+        if len(token) > 3:
+            token_bytes = token.encode("ASCII").hex().upper()
+            token_symbol = '{:<040s}'.format(token_bytes)
+        else:
+            token_symbol = token.upper()
 
         amount_in_token = IssuedCurrencyAmount(value=token_amount,
                                                issuer=issuer_address,
