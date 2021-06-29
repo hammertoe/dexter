@@ -1,4 +1,5 @@
 import cmd
+import os
 
 from xrpl.clients import JsonRpcClient
 from xrpl.models.amounts import IssuedCurrencyAmount
@@ -10,20 +11,36 @@ from xrpl.transaction \
 from xrpl.utils import xrp_to_drops
 from xrpl.wallet import Wallet, generate_faucet_wallet
 
-client = JsonRpcClient("https://s.altnet.rippletest.net:51234/")
+TESTNET_URL = "https://s.altnet.rippletest.net:51234/"
+# override the default by providing XRPL_JSONRPC_URL in the environment
+XRPL_JSONRPC_URL = os.getenv("XRPL_JSONRPC_URL", TESTNET_URL)
+
+client = JsonRpcClient(XRPL_JSONRPC_URL)
 
 
 class Dexter(cmd.Cmd):
     intro = "Welcome to Dexter!"
     prompt = '(dexter) '
 
+    # exit EOF
+    def _close(self):
+        return True
+
+    def do_EOF(self, arg):
+        """Exit with ^D"""
+        return self._close()
+
+    do_exit = do_EOF
+
+
     def do_issue(self, arg):
         """Issue a new testnet currency
 
-Parameters:
-- token (for example, USD)
-- amount (for example, 1000)
-- receiver seed (generate on XRPL TestNet Faucet)"""
+        Parameters:
+        - token (for example, USD)
+        - amount (for example, 1000)
+        - receiver seed (generate on XRPL TestNet Faucet)
+        """
 
         print("Issuing currency")
 
@@ -80,13 +97,14 @@ Parameters:
     def do_liquidity(self, arg):
         """Create orders on DEX
 
-Parameters:
-- token_with_address, format <token.issuer_address> (for example, USD.r4MHpHsaZnQ9L1F2Qh4YhXD1CaRA7SUz8v)
-- amount (for example, 100)
-- mid price (for example, 0.87)
-- steps (for example, 3)
-- interval - in bps of mid price - for example, 20
-- receiver seed (use the same as in issuance)"""
+        Parameters:
+        - token_with_address, format <token.issuer_address> (for example, USD.r4MHpHsaZnQ9L1F2Qh4YhXD1CaRA7SUz8v)
+        - amount (for example, 100)
+        - mid price (for example, 0.87)
+        - steps (for example, 3)
+        - interval - in bps of mid price - for example, 20
+        - receiver seed (use the same as in issuance)
+        """
 
         print("Creating liquidity on DEX")
 
