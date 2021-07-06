@@ -2,6 +2,15 @@
 A tool for creating orders on the XRP Ledger DEX
 
 
+## Installation
+
+Create a virtual environment, install xrp-py, and run dexter:
+
+```python3 -m venv venv
+./venv/bin/activate
+python dexter.py
+```
+
 This was created as part of the Ripple Innovate hackathon.
 
 ## Plan
